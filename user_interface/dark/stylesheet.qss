@@ -55,7 +55,7 @@ QToolTip
 QWidget
 {
     color: #eff0f1;
-    background-color: #31363b;
+    background-color: #A0A9AD;
     selection-background-color: #3daee9;
     selection-color: #eff0f1;
     background-clip: border;
@@ -831,11 +831,11 @@ QDialog QToolBar QToolButton[popupMode="2"]
 
 QPushButton
 {
-    color: #eff0f1;
-    background-color: #31363b;
+    color: #231F20;
+    background-color: #88969A; 
     border: 0.04em solid #76797c;
     padding: 0.23em;
-    border-radius: 0.09em;
+    border-radius: 25px;
     outline: none;
     min-height: 1.1em;
 }
@@ -844,7 +844,8 @@ QComboBox:open,
 QPushButton:open
 {
     border-width: 0.04em;
-    border-color: #76797c;
+    border-color: #FFFFFF;
+    color: #231F20;
 }
 
 QComboBox:closed,
@@ -856,16 +857,15 @@ QPushButton:closed
 
 QPushButton:disabled
 {
-    background-color: #31363b;
+    color: #231F20;
+    background-color: #88969A; 
     border-width: 0.04em;
-    border-color: #76797c;
     border-style: solid;
     padding-top: 0.23em;
     padding-bottom: 0.23em;
     padding-left: 1ex;
     padding-right: 1ex;
-    border-radius: 0.04em;
-    color: #454545;
+    opacity: 50;
 }
 
 QPushButton:focus
@@ -883,10 +883,12 @@ QPushButton:pressed
 
 QComboBox
 {
-    border: 0.04em solid #76797c;
-    border-radius: 0.09em;
     padding: 0.23em;
     min-width: 2.5em;
+    color: #231F20;
+    background-color: #88969A;     
+    border-radius: 25px;
+    border: 0.04em solid #76797c;
 }
 
 QComboBox:editable
@@ -1269,6 +1271,7 @@ QCalendarWidget QSpinBox
 QLabel
 {
     border: 0em solid black;
+    color: #231F20;
 }
 
 /* BORDERS */
