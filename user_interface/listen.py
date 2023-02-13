@@ -5,7 +5,7 @@ import pyaudio
 class Listen:
 
     def __init__(self):
-        model = Model(r"./vosk-model-small-en-us-0.15")
+        model = Model(r"./vosk-model-en-us-0.22")
         self.recognizer = KaldiRecognizer(model, 16000)
 
         mic = pyaudio.PyAudio()
