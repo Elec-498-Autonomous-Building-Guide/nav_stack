@@ -265,3 +265,4 @@
 /user_interface/vosk-model-en-us-0.22/rnnlm/feat_embedding.final.mat filter=lfs diff=lfs merge=lfs -text
 /user_interface/vosk-model-en-us-0.22/rnnlm/final.raw filter=lfs diff=lfs merge=lfs -text
 /user_interface/vosk-model-en-us-0.22/rnnlm/word_feats.txt filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22.zip filter=lfs diff=lfs merge=lfs -text
