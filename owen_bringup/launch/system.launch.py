@@ -14,9 +14,11 @@ from launch.substitutions import LaunchConfiguration, PythonExpression
 def generate_launch_description():
     simulation = LaunchConfiguration('simulation')
     localization = LaunchConfiguration('localization')
+    shit_lidar = LaunchConfiguration('shit_lidar')
 
-    simulation_arg = DeclareLaunchArgument("simulation", default_value='True')
+    simulation_arg = DeclareLaunchArgument("simulation", default_value='False')
     localization_arg = DeclareLaunchArgument("localization", default_value='False')
+    shit_lidar_arg = DeclareLaunchArgument("shit_lidar", default_value='False')
 
     slam_params_file = os.path.join(get_package_share_directory('owen_bringup'),
                                     'config', 'mapper_params_online_async.yaml')
@@ -51,6 +53,12 @@ def generate_launch_description():
 
 #    localization_launch = Node(package='owen_bringup', executable='map_switcher.py', output='screen', name='map_switcher', condition=IfCondition(PythonExpression([localization])))
 
+    velodyne_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory('velodyne'), 'launch'),
+                    '/velodyne-all-nodes-VLP16-composed-launch.py']),
+                    condition=IfCondition(PythonExpression(['not ', shit_lidar]))
+        )
     lidar_node = Node(
         package='rplidar_ros',
         executable='rplidar_composition',
@@ -61,7 +69,7 @@ def generate_launch_description():
             'frame_id' : 'laser',
             'angle_compensate' : True
             }],
-        condition=IfCondition(PythonExpression(['not ', simulation]))
+        condition=IfCondition(PythonExpression(['not ', simulation, ' and ', shit_lidar]))
         )
     simulation_launch = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
@@ -69,12 +77,20 @@ def generate_launch_description():
             condition=IfCondition(PythonExpression([simulation]))
             )
 
-    map_features = Node(
-            package='map_features',
-            executable='map_features',
-            name='map_features',
-            output='screen'
-            )
+    point_cloud_transform = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory('pointcloud_to_laserscan'), 'launch'),
+                    '/sample_pointcloud_to_laserscan_launch.py']),
+                    condition=IfCondition(PythonExpression(['not ', shit_lidar]))
+        )
+
+
+#    map_features = Node(
+#            package='map_features',
+#            executable='map_features',
+#            name='map_features',
+#            output='screen'
+#            )
 
     navigation_launch = IncludeLaunchDescription(
       PythonLaunchDescriptionSource([os.path.join(
@@ -94,19 +110,19 @@ def generate_launch_description():
         output='screen'
     )
 
-    elevator_traverser = Node(
-            package='elevator_traverser',
-            executable='elevator_traverser',
-            name='elevator_traverser',
-            output='screen'
-            )
+#    elevator_traverser = Node(
+#            package='elevator_traverser',
+#            executable='elevator_traverser',
+#            name='elevator_traverser',
+#            output='screen'
+#            )
 
-    master_navigator = Node(
-            package='master_navigator',
-            executable='master_navigator',
-            name='master_navigator',
-            output='screen'
-            )
+#    master_navigator = Node(
+#            package='master_navigator',
+#            executable='master_navigator',
+#            name='master_navigator',
+#            output='screen'
+#            )
 
    # apriltag_launch = IncludeLaunchDescription(
    #         PythonLaunchDescriptionSource([os.path.join(get_package_share_directory('apriltag_ros'), 'launch', 'tag_36h11_all.launch.py')]), condition=IfCondition(PythonExpression(['not ', simulation]))
@@ -125,17 +141,20 @@ def generate_launch_description():
     ld = LaunchDescription([
         simulation_arg,
         localization_arg,
-        map_features,
+        shit_lidar_arg,
+#        map_features,
 #        simulation_launch,
         slam_launch,
         system_controller,
         create_launch,
+        point_cloud_transform,
         navigation_launch,
         localization_launch,
+        velodyne_launch,
         lidar_node,
 #        elevator_traverser,
     #    apriltag_launch,
-        master_navigator,
+#        master_navigator,
     #    apriltag_node
         ])
 

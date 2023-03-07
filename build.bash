@@ -2,8 +2,8 @@
 
 source /opt/ros/humble/setup.bash
 
-export CXX=clang++
-export CC=clang
+#export CXX=clang++
+#export CC=clang
 rm -r build 
 rm -r install
 rm -r log
