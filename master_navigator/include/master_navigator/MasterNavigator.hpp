@@ -51,7 +51,7 @@ private:
   void handle_navigation_success();
   void handle_navigation_failure();
 
-  void send_spoken_instruction() const;
+  void send_spoken_instruction();
 
   void control_loop();
   void process_new_destination();
@@ -88,4 +88,5 @@ private:
   uint path_idx;
   uint8_t log_period_count;
   std::unique_ptr<MultifloorPathPlanner> planner;
+  bool publishedSpeak;
 };

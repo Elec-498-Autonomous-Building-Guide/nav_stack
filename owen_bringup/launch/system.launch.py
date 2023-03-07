@@ -32,25 +32,25 @@ def generate_launch_description():
                     condition=IfCondition(PythonExpression(['not ', localization]))
         )
     slam_params_file = os.path.join(get_package_share_directory('owen_bringup'), 'config',
-                                        '1_mapper_params_localization.yaml')
-    localization_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-                    get_package_share_directory('slam_toolbox'), 'launch'),
-                    '/online_async_launch.py']),
-                    launch_arguments = {'slam_params_file': slam_params_file}.items(), 
-                    condition=IfCondition(PythonExpression([localization]))
-        )
+                                        '1_mapper_params_localization_ingenuity.yaml')
+#    localization_launch = IncludeLaunchDescription(
+#        PythonLaunchDescriptionSource([os.path.join(
+#                    get_package_share_directory('slam_toolbox'), 'launch'),
+#                    '/online_async_launch.py']),
+#                    launch_arguments = {'slam_params_file': slam_params_file}.items(), 
+#                    condition=IfCondition(PythonExpression([localization]))
+#        )
  
-   # localization_launch = Node(
-   #         parameters=[
-   #             slam_params_file
-   #         ],
-   #         package='slam_toolbox',
-   #         executable='localization_slam_toolbox_node',
-   #         name='slam_toolbox',
-   #         output='screen',
-   #         condition=IfCondition(PythonExpression([localization]))
-   #     )
+#    localization_launch = Node(
+#            parameters=[
+#                slam_params_file
+#            ],
+#            package='slam_toolbox',
+#            executable='localization_slam_toolbox_node',
+#            name='slam_toolbox',
+#            output='screen',
+#            condition=IfCondition(PythonExpression([localization]))
+#        )
 
 
     localization_launch = Node(package='owen_bringup', executable='map_switcher.py', output='screen', name='map_switcher', condition=IfCondition(PythonExpression([localization])))
@@ -179,9 +179,9 @@ def generate_launch_description():
         lidar_node,
         elevator_traverser,
         dummy_elevator_traverser,
-        apriltag_launch,
+        #apriltag_launch,
         master_navigator,
-        apriltag_node
+        #apriltag_node
         ])
 
     return ld;

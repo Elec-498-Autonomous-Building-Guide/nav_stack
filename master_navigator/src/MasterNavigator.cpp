@@ -3,6 +3,7 @@
 #include <functional>
 #include <roomba_msgs/msg/detail/multifloor_point__struct.hpp>
 #include <string>
+#include <sstream>
 #include <unordered_map>
 
 namespace Constants
@@ -19,6 +20,7 @@ std::unordered_map<NavigationState, std::string> MapToString = {
 
 MasterNavigator::MasterNavigator(const std::string& name) : rclcpp::Node(name), log_period_count(0)
 {
+  publishedSpeak = false;
   this->declare_parameter("/starting_floor", rclcpp::ParameterValue("1"));
   current_pos.floor_id.data = this->get_parameter("/starting_floor").as_string();
 
@@ -129,11 +131,24 @@ void MasterNavigator::navigation_feedback_callback(const rclcpp_action::ClientGo
   }
 }
 
-void MasterNavigator::send_spoken_instruction() const
+
+double getDeltaAngle(double currentHeading, double nextHeading){
+   double diff = currentHeading - nextHeading;
+   double absDiff = std::abs(diff);
+   if(absDiff <= 3.14159){
+      return absDiff == 3.14159 ? absDiff : diff;
+   }
+   else if(currentHeading > nextHeading){
+      return absDiff - 2.0*3.14159;
+   }
+   return 2.0*3.14159 - absDiff;
+}
+
+void MasterNavigator::send_spoken_instruction()
 {
   const size_t num_points = path.points.size();
   std_msgs::msg::String spoken_text;
-  if (path_idx >= num_points || path_idx == 0)
+  if (path_idx >= num_points || path_idx == 0 || publishedSpeak)
   {
     return;
   }
@@ -145,34 +160,38 @@ void MasterNavigator::send_spoken_instruction() const
   {
     const auto prev = path.points.at(path_idx - 1);
     const auto curr = path.points.at(path_idx);
-    const auto next = path.points.at(path_idx);
+    const auto next = path.points.at(path_idx + 1);
 
     if (curr.floor_id != next.floor_id)
     {
       spoken_text.data = "Approaching Elevator";
     }
     else
-    {
+    {    
       const auto prev_heading = std::atan2(prev.point.y - curr.point.y, prev.point.x - curr.point.x);
       const auto next_heading = std::atan2(next.point.y - curr.point.y, next.point.x - curr.point.x);
-      const auto delta_heading = next_heading - prev_heading;
+      const auto delta_heading = getDeltaAngle(prev_heading, next_heading);
 
-      if (std::abs(delta_heading) < 0.3)
+      std::stringstream ss;
+      ss << "PREV: " << prev_heading << " NEXT: " << next_heading << " DELTA: " << delta_heading;
+
+      if (std::abs(delta_heading) < 0.3 || abs(delta_heading) > 2.8)
       {
-        spoken_text.data = "Approaching intersection, procede straight";
+        spoken_text.data = "Approaching intersection, procede straight " + ss.str();
       }
       else if (delta_heading < 0)
       {
-        spoken_text.data = "Approaching intersection, turn left";
+        spoken_text.data = "Approaching intersection, turn right"+ ss.str();
       }
       else
       {
-        spoken_text.data = "Approaching intersection, turn right";
+        spoken_text.data = "Approaching intersection, turn left"+ ss.str();
       }
     }
   }
 
   this->speak_pub->publish(std::move(spoken_text));
+  publishedSpeak = true;
 }
 
 void MasterNavigator::traverse_elevator(ElevatorClientT::Goal& goal)
@@ -241,6 +260,7 @@ void MasterNavigator::handle_navigation_success()
       state = NavigationState::TraverseElevator;
       ElevatorClientT::Goal goal;
       goal.target_floor = path.points[path_idx].floor_id;
+      publishedSpeak = false;
       this->traverse_elevator(goal);
     }
     else
@@ -249,6 +269,7 @@ void MasterNavigator::handle_navigation_success()
       goal.pose.header.frame_id = "map";
       goal.pose.header.stamp = this->get_clock()->now();
       goal.pose.pose.position = path.points[path_idx].point;
+      publishedSpeak = false;
       this->navigate_to_goal(goal);
     }
   }
@@ -305,6 +326,10 @@ void MasterNavigator::elevator_goal_respose_callback(
   {
     RCLCPP_ERROR(get_logger(), "Elevator traversal failed to start HANDLE THIS FAILURE");
     state = NavigationState::WaitingForDestination;
+  }
+  else
+  {
+    current_pos.floor_id.data = goal->target_floor; 
   }
 }
 

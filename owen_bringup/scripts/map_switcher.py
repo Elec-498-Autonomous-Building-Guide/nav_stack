@@ -30,7 +30,7 @@ def floor_callback(msg):
         ls.shutdown()
         current_loaded_floor = msg.data
         slam_params_file = os.path.join(get_package_share_directory('owen_bringup'), 'config',
-                                        current_loaded_floor + '_mapper_params_localization.yaml')
+                                        current_loaded_floor + '_mapper_params_localization_ingenuity.yaml')
         slam_launch = Node(
             parameters=[
                 slam_params_file

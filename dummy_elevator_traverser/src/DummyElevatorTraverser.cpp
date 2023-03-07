@@ -11,6 +11,8 @@ DummyElevatorTraverser::DummyElevatorTraverser(const std::string& name) : rclcpp
   this->_cmdVelPub = this->create_publisher<geometry_msgs::msg::Twist>("/elevator_traverser/cmd_vel", 1);
   this->_tagSub = this->create_subscription<apriltag_msgs::msg::AprilTagDetectionArray>(
       "/detections", 10, std::bind(&DummyElevatorTraverser::tagDetectionCallback, this, std::placeholders::_1));
+    
+  this->_lastTagTime = this->get_clock()->now();
 
   this->_timer =
       this->create_wall_timer(std::chrono::duration<double>(0.05), std::bind(&DummyElevatorTraverser::execute, this));
@@ -50,7 +52,9 @@ void DummyElevatorTraverser::execute()
   const auto tagElapsed = this->get_clock()->now() - this->_lastTagTime;
   if (this->_hasSeenTag && tagElapsed.seconds() > 5)
   {
-    TraverseElevator::Result::SharedPtr result;
+    TraverseElevator::Result::SharedPtr result = std::make_shared<TraverseElevator::Result>();
+    result->arrived_floor = _goalHandle->get_goal()->target_floor;
+    result->success = true;
     this->_goalHandle->succeed(result);
     this->_timer->cancel();
   }
@@ -70,7 +74,7 @@ void DummyElevatorTraverser::reset()
 void DummyElevatorTraverser::tagDetectionCallback(
     const apriltag_msgs::msg::AprilTagDetectionArray::ConstSharedPtr detections)
 {
-  if (!detections->detections.empty())
+  //if (!detections->detections.empty())
   {
     this->_hasSeenTag = true;
     this->_lastTagTime = this->get_clock()->now();
