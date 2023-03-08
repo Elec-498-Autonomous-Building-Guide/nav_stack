@@ -1,4 +1,5 @@
 from vosk import Model, KaldiRecognizer
+from word2number import w2n
 
 import pyaudio
 
@@ -20,34 +21,9 @@ class Listen:
             if self.recognizer.AcceptWaveform(data):
                 text = self.recognizer.Result()
                 return text[14:-3]
-    
-    def text_to_number (self, text):
-        updated = ""
-        text = text.split(" ")
-        for t in text:
-            if (t == "one"):
-                updated += "1"
-            elif (t == "two"):
-                updated += "2"
-            elif (t == "three"):
-                updated += "3"
-            elif (t == "four"):
-                updated += "4"
-            elif (t == "five"):
-                updated += "5"
-            elif (t == "six"):
-                updated += "6"
-            elif (t == "seven"):
-                updated += "7"
-            elif (t == "eight"):
-                updated += "8"
-            elif (t == "nine"):
-                updated += "9"
-            elif (t == "zero"):
-                updated += "0"
-            else:
-                updated += t
-        return updated
+            
+    def text_to_number(self,text):
+        return str(w2n.word_to_num(text))
 
             
 

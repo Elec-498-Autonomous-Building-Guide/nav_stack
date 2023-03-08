@@ -12,14 +12,12 @@ from PyQt5 import QtTest
 class App(QWidget):
     def __init__(self):
         super().__init__()
-
+        self.sound = True
         self.setup()
-        self.sound = False;
-        self.audio("Welcome",'Welcome to Beamish Munro Hall. My name is George. I will guide you to your destination within the building. Press H if you would like to hear the help menu. Would you like to go to floor 1, 2, or 3?')
         self.rooms = ['Select']
         self.floors = ['Select', '1', '2', '3']
-        self.floor_num = None
-        self.room_num = None;
+        self.floor_num = "Select"
+        self.room_num = "Select";
         self.dark_mode = True
         self.state = "Floor"
 
@@ -62,6 +60,8 @@ class App(QWidget):
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
+        self.audio("Welcome",'Welcome to Beamish Munro Hall. My name is George. I will guide you to your destination within the building. Press H if you would like to hear the help menu.')
+
         self.first()
 
     def first(self):
@@ -99,14 +99,16 @@ class App(QWidget):
         self.layoutH3.addWidget(self.dot3)
         self.layoutH3.addWidget(self.dot4)
         
-        self.help = QPushButton("H")
+        self.help = QPushButton()
+        self.help.setIcon(QIcon("icons/unmute_black.png"))
+        self.help.setIconSize(QSize(60, 60))
         self.help.setFont(QFont("Asap",50))
         self.help.setFixedWidth(100)
         self.help.clicked.connect(self.playHelpMenu)
         self.layoutH5.addWidget(self.help)
 
         self.mute = QPushButton()
-        self.mute.setIcon(QIcon("icons/unmute_black.png"))
+        self.mute.setIcon(QIcon("icons/Help.png"))
         self.mute.setIconSize(QSize(60, 60))
         self.mute.setFixedWidth(100)
         self.mute.clicked.connect(self.muteSound)
@@ -151,14 +153,18 @@ class App(QWidget):
         self.button = QPushButton()
         self.button.setIcon(QIcon("./icons/Arrow.png"))
         self.button.setIconSize(QSize(60, 60))
+        self.button.setEnabled(False)
         self.layoutH2.addWidget(self.button)
-        if (self.floor_num != 'Select'):
-            self.button.setEnabled(True)
+       
         self.button.setFixedWidth(100)
         self.button.clicked.connect(self.handleButtonPress)
     
     def setFloor(self,value):
         self.floor_num = value
+        if (self.floor_num != 'Select'):
+            self.button.setEnabled(True)
+        else:
+            self.button.setEnabled(False)
 
     def handleButtonPress(self):
         if (self.state == "Floor"):
@@ -167,6 +173,15 @@ class App(QWidget):
             self.directions()
 
     def listRooms(self):
+        self.layoutH2.removeWidget(self.button)
+        self.cancel = QPushButton()
+        self.cancel.setIcon(QIcon("./icons/Back.png"))
+        self.cancel.setIconSize(QSize(60, 60))
+        self.cancel.setFixedWidth(100)
+        self.layoutH2.addWidget(self.cancel)
+        self.layoutH2.addWidget(self.button)
+        self.button.setEnabled(False)
+        self.cancel.clicked.connect(self.cancelState)
         self.state = "Room"
         self.dot2.setPixmap(self.pixmap)
         self.rooms = ["Select"]
@@ -187,6 +202,11 @@ class App(QWidget):
 
     def setRoom(self,value):
         self.room_num = value
+        print(self.room_num)
+        if (self.room_num != 'Select'):
+            self.button.setEnabled(True)
+        else:
+            self.button.setEnabled(False)
 
     # Confirm destination
     def destination(self,value):
@@ -203,15 +223,10 @@ class App(QWidget):
         self.state = "Obstacles"
         self.dot3.setPixmap(self.pixmap)
         
-        self.layoutH2.removeWidget(self.combobox1)
-        self.combobox1.deleteLater()
-        self.combobox1 = None
+        self.clearWidget(self.layoutH2, self.combobox1)
+        self.clearWidget(self.layoutH2, self.button)
+        self.clearWidget(self.layoutH2, self.cancel)
 
-        self.layoutH2.removeWidget(self.button)
-        self.button.deleteLater()
-        self.button = None
-
-        
         self.l1.setText("Hazards in path: ")
         
         obstacles = backend.getObstackeList();
@@ -226,8 +241,9 @@ class App(QWidget):
         self.c = QPushButton()
         self.c.setIcon(QIcon("./icons/Arrow.png"))
         self.c.setIconSize(QSize(60, 60))
-        self.cancel = QPushButton("Cancel")
-        self.cancel.setFont(QFont("Asap",50))
+        self.cancel = QPushButton()
+        self.cancel.setIcon(QIcon("./icons/Back.png"))
+        self.cancel.setIconSize(QSize(60, 60))
         self.layoutH2.addWidget(self.cancel)
         self.layoutH2.addWidget(self.c)
         self.c.clicked.connect(self.navigating)
@@ -256,7 +272,7 @@ class App(QWidget):
 
         self.clearWidget(self.layoutH2, self.l2)
         self.clearWidget(self.layoutH2, self.c)
-
+        self.clearWidget(self.layoutH2, self.cancel)
         # Clear screen
 
         # Robot should begin moving here
@@ -268,9 +284,11 @@ class App(QWidget):
         while(True):
             direction = backend.getDirections()
             if (direction is not None):
-                self.audio(direction,direction)
                 self.l1.setText(direction)
+                self.audio(direction,direction)
+                QtTest.QTest.qWait(2000)
                 break
+        self.l1.setText("Arrived!")
         self.audio("Arrived", "You have arrived at your destination.")
 
     # Clear Widget
