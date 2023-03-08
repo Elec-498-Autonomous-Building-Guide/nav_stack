@@ -24,3 +24,6 @@ def getObstackeList():
 
 def sendRoom(room):
     pass
+
+def getDirections():
+    return "Left"

@@ -14,7 +14,7 @@ class App(QWidget):
         super().__init__()
 
         self.setup()
-        self.sound = True;
+        self.sound = False;
         self.audio("Welcome",'Welcome to Beamish Munro Hall. My name is George. I will guide you to your destination within the building. Press H if you would like to hear the help menu. Would you like to go to floor 1, 2, or 3?')
         self.rooms = ['Select']
         self.floors = ['Select', '1', '2', '3']
@@ -51,8 +51,7 @@ class App(QWidget):
     def setup(self):
         self.setWindowTitle("Autonomous Building Guide")
         self.setFixedWidth(900)
-        self.state = "Select"
-
+    
         with open("dark/stylesheet.qss", "r") as f:
             content = f.readlines()
         text = ""
@@ -62,6 +61,11 @@ class App(QWidget):
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
+
+        self.first()
+
+    def first(self):
+        self.state = "Select"
 
         self.layoutH1 = QHBoxLayout()
         self.layoutH2 = QHBoxLayout()
@@ -115,31 +119,6 @@ class App(QWidget):
         self.mic.clicked.connect(self.handleSpeech)
         self.layoutH5.addWidget(self.mic)
 
-
-        # self.label = QLabel()
-
-        # self.backward = QAction()
-        # self.backward.setIcon(QIcon('icons/back_white.png'))
-        # self.backward.setEnabled(False)
-        # self.help = QAction("Help")
-        # self.help.triggered.connect(self.playHelpMenu)
-        # self.mute = QAction()
-        # self.mute.setIcon(QIcon('icons/unmute_white.png'))
-        # self.mute.triggered.connect(self.muteSound)
-        # self.mode = QAction()
-        # self.mode.setIcon(QIcon('icons/moon.png'))
-        # self.mode.triggered.connect(self.changeMode)
-
-        # self.menuBar = QMenuBar(self)
-        # self.menuBar.setNativeMenuBar(False)
-        # self.menuBar.addAction(self.backward)
-        # self.menuBar.addAction(self.mute)
-        # self.menuBar.addAction(self.mode)
-        # self.menuBar.addAction(self.help)
-
-        # self.layout.setMenuBar(self.menuBar)
-        # self.layout.addWidget(self.label)
-
     def audio(self,filename, message):
         if (self.sound):
             files = os.listdir('sound')
@@ -159,7 +138,6 @@ class App(QWidget):
     def select_floor(self):
         self.state = "Floor"
         self.l1 = QLabel('Select Floor')
-        #self.l1.setAlignment(Qt.AlignHCenter)
         self.l1.setFont(QFont("Asap",50))
         self.combobox1 = QComboBox()
         self.combobox1.setFixedWidth(500)
@@ -169,15 +147,6 @@ class App(QWidget):
         self.combobox1.currentTextChanged.connect(self.setFloor)
         self.layoutH1.addWidget(self.l1)
         self.layoutH2.addWidget(self.combobox1)
-        
-
-        # self.l2 = QLabel('Select Room: ')
-        # self.combobox2 = QComboBox()
-        # self.combobox2.addItems(self.rooms)
-        
-        # self.combobox2.currentTextChanged.connect(self.destination)
-        # self.layoutH2.addWidget(self.l2)
-        # self.layoutH2.addWidget(self.combobox2)
 
         self.button = QPushButton()
         self.button.setIcon(QIcon("./icons/Arrow.png"))
@@ -252,13 +221,32 @@ class App(QWidget):
         self.l2 = QLabel(ob)
         self.l2.setFont(QFont("Asap",50))
         self.l2.setAlignment(Qt.AlignHCenter)
-        self.layoutH2.addWidget(self.l2)
+        self.layoutH1.addWidget(self.l2)
 
         self.c = QPushButton()
         self.c.setIcon(QIcon("./icons/Arrow.png"))
         self.c.setIconSize(QSize(60, 60))
+        self.cancel = QPushButton("Cancel")
+        self.cancel.setFont(QFont("Asap",50))
+        self.layoutH2.addWidget(self.cancel)
         self.layoutH2.addWidget(self.c)
         self.c.clicked.connect(self.navigating)
+        self.cancel.clicked.connect(self.cancelState)
+
+    def deleteItemsOfLayout(self,layout):
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.setParent(None)
+                else:
+                    self.deleteItemsOfLayout(item.layout())
+
+    def cancelState(self):
+        self.deleteItemsOfLayout(self.layout)
+        self.first()
+        self.select_floor()
 
     # Screen when navigating to destination
     def navigating(self):
@@ -274,11 +262,16 @@ class App(QWidget):
         # Robot should begin moving here
         self.audio("Going" + self.room_num, "Going to room " + self.room_num)
         QtTest.QTest.qWait(3000)
+        self.onRoute()
 
-        # Play elevator music
-        #mixer.init()
-        #mixer.music.load("Georgeofthejungle.mp3")
-        #mixer.music.play()
+    def onRoute(self):
+        while(True):
+            direction = backend.getDirections()
+            if (direction is not None):
+                self.audio(direction,direction)
+                self.l1.setText(direction)
+                break
+        self.audio("Arrived", "You have arrived at your destination.")
 
     # Clear Widget
     def clearWidget(self, base, item):
@@ -297,39 +290,6 @@ class App(QWidget):
             self.sound = True
             self.audio("Soundon","Sound on")
             QtTest.QTest.qWait(1000)
-
-    def goBack(self):
-        self.clearWidget(self.backward)
-        self.clearWidget(self.mute)
-        self.clearWidget(self.help)
-        self.setup()
-
-    def changeMode(self):
-        if (self.dark_mode):
-            self.dark_mode = False
-            self.mode.setIcon(QIcon('icons/sun.png'))
-            self.backward.setIcon(QIcon('icons/back_black.png'))
-            if (self.sound): self.mute.setIcon(QIcon('icons/unmute_black.png'))
-            else: self.mute.setIcon(QIcon('icons/mute_black.png'))
-            with open("light/stylesheet.qss", "r") as f:
-                content = f.readlines()
-            text = ""
-            for i in content:
-                text += i
-            self.setStyleSheet(text)
-
-        else:
-            self.dark_mode = True
-            self.mode.setIcon(QIcon('icons/moon.png'))
-            self.backward.setIcon(QIcon('icons/back_white.png'))
-            if (self.sound): self.mute.setIcon(QIcon('icons/unmute_white.png'))
-            else: self.mute.setIcon(QIcon('icons/mute_white.png'))
-            with open("dark/stylesheet.qss", "r") as f:
-                content = f.readlines()
-            text = ""
-            for i in content:
-                text += i
-            self.setStyleSheet(text)
 
     def playHelpMenu(self):
         text = "Help Menu. M to mute/unmute. B to change to light/dark mode."
