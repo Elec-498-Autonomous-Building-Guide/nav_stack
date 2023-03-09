@@ -131,17 +131,19 @@ void MasterNavigator::navigation_feedback_callback(const rclcpp_action::ClientGo
   }
 }
 
-
-double getDeltaAngle(double currentHeading, double nextHeading){
-   double diff = currentHeading - nextHeading;
-   double absDiff = std::abs(diff);
-   if(absDiff <= 3.14159){
-      return absDiff == 3.14159 ? absDiff : diff;
-   }
-   else if(currentHeading > nextHeading){
-      return absDiff - 2.0*3.14159;
-   }
-   return 2.0*3.14159 - absDiff;
+double getDeltaAngle(double currentHeading, double nextHeading)
+{
+  double diff = currentHeading - nextHeading;
+  double absDiff = std::abs(diff);
+  if (absDiff <= 3.14159)
+  {
+    return absDiff == 3.14159 ? absDiff : diff;
+  }
+  else if (currentHeading > nextHeading)
+  {
+    return absDiff - 2.0 * 3.14159;
+  }
+  return 2.0 * 3.14159 - absDiff;
 }
 
 void MasterNavigator::send_spoken_instruction()
@@ -167,7 +169,7 @@ void MasterNavigator::send_spoken_instruction()
       spoken_text.data = "Approaching Elevator";
     }
     else
-    {    
+    {
       const auto prev_heading = std::atan2(prev.point.y - curr.point.y, prev.point.x - curr.point.x);
       const auto next_heading = std::atan2(next.point.y - curr.point.y, next.point.x - curr.point.x);
       const auto delta_heading = getDeltaAngle(prev_heading, next_heading);
@@ -181,11 +183,11 @@ void MasterNavigator::send_spoken_instruction()
       }
       else if (delta_heading < 0)
       {
-        spoken_text.data = "Approaching intersection, turn right"+ ss.str();
+        spoken_text.data = "Approaching intersection, turn right" + ss.str();
       }
       else
       {
-        spoken_text.data = "Approaching intersection, turn left"+ ss.str();
+        spoken_text.data = "Approaching intersection, turn left" + ss.str();
       }
     }
   }
@@ -292,6 +294,7 @@ void MasterNavigator::elevator_result_callback(
   switch (result.code)
   {
     case rclcpp_action::ResultCode::SUCCEEDED: {
+      this->current_pos.floor_id = result.result->arrived_floor;
       state = NavigationState::NavigateToPoint;
       NavigateClientT::Goal goal;
       goal.pose.header.frame_id = "map";
@@ -326,10 +329,6 @@ void MasterNavigator::elevator_goal_respose_callback(
   {
     RCLCPP_ERROR(get_logger(), "Elevator traversal failed to start HANDLE THIS FAILURE");
     state = NavigationState::WaitingForDestination;
-  }
-  else
-  {
-    current_pos.floor_id.data = goal->target_floor; 
   }
 }
 

@@ -11,7 +11,7 @@ DummyElevatorTraverser::DummyElevatorTraverser(const std::string& name) : rclcpp
   this->_cmdVelPub = this->create_publisher<geometry_msgs::msg::Twist>("/elevator_traverser/cmd_vel", 1);
   this->_tagSub = this->create_subscription<apriltag_msgs::msg::AprilTagDetectionArray>(
       "/detections", 10, std::bind(&DummyElevatorTraverser::tagDetectionCallback, this, std::placeholders::_1));
-    
+
   this->_lastTagTime = this->get_clock()->now();
 
   this->_timer =
@@ -74,7 +74,7 @@ void DummyElevatorTraverser::reset()
 void DummyElevatorTraverser::tagDetectionCallback(
     const apriltag_msgs::msg::AprilTagDetectionArray::ConstSharedPtr detections)
 {
-  //if (!detections->detections.empty())
+  // if (!detections->detections.empty())
   {
     this->_hasSeenTag = true;
     this->_lastTagTime = this->get_clock()->now();
