@@ -3,7 +3,7 @@ import time
 from rclpy import node
 from roomba_msgs.srv import GetAvailableDestinations
 from roomba_msgs.msg import MultifloorPoint
-from std_msgs.msg import Empty
+from std_msgs.msg import Empty, String
 
 # Fake backend
 
@@ -16,6 +16,13 @@ rclpy.spin_once(node, timeout_sec=0.5)
 
 destinationClient = node.create_client(GetAvailableDestinations, '/available_destinations')
 destPub = node.create_publisher(MultifloorPoint, '/multifloor_destination', 10)
+directions = None
+
+def direction_callback(dir):
+    global directions
+    directions = dir.data
+
+speak_pub = node.create_subscription(String, '/speak', direction_callback, 10)
 
 destinationClient.wait_for_service()
 
@@ -54,6 +61,12 @@ def getObstackeList():
 def sendRoom(room):
     r = str(room)
     destPub.publish(ptsByRoom[r])
+
+def getDirections():
+    global directions
+    tmp = directions
+    directions = None
+    return tmp
     
 
 
