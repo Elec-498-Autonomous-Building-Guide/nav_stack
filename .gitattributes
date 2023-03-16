@@ -256,3 +256,17 @@
 /user_interface/vosk-model-small-en-us-0.15/ivector/final.ie filter=lfs diff=lfs merge=lfs -text
 /maps/ingenuity/ingenuity.data filter=lfs diff=lfs merge=lfs -text
 /maps/ingenuity/ingenuity.posegraph filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/am/final.mdl filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/am/tree filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/graph/HCLG.fst filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/graph/phones/align_lexicon.int filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/graph/phones/align_lexicon.txt filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/graph/words.txt filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/ivector/final.dubm filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/ivector/final.ie filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/rescore/G.carpa filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/rescore/G.fst filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/rnnlm/feat_embedding.final.mat filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/rnnlm/final.raw filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22/rnnlm/word_feats.txt filter=lfs diff=lfs merge=lfs -text
+/user_interface/vosk-model-en-us-0.22.zip filter=lfs diff=lfs merge=lfs -text
